@@ -1,0 +1,71 @@
+# -----------------------------------------------------------
+# CONFIGURACIÓN DEL WORKFLOW
+# -----------------------------------------------------------
+name: Deploy MkDocs # Define el nombre de este flujo de trabajo (aparece en la pestaña 'Actions' de GitHub).
+
+on:
+  # Define el evento que dispara este flujo de trabajo.
+  push:
+    # Este workflow se ejecutará automáticamente cada vez que se haga un 'push' (subida)
+    # de código al repositorio.
+    branches:
+      - main # Específicamente, solo se ejecuta si el push se realiza sobre la rama 'main'.
+
+# -----------------------------------------------------------
+# PERMISOS
+# -----------------------------------------------------------
+# Otorga permisos específicos al GITHUB_TOKEN que se usará en este workflow.
+permissions:
+  contents: write # Permite que el token pueda leer y escribir contenido (necesario para la rama gh-pages).
+  pages: write    # Permite gestionar y escribir en la configuración de GitHub Pages.
+  id-token: write # Permite solicitar tokens de OpenID Connect (necesario para algunas integraciones de seguridad).
+
+# -----------------------------------------------------------
+# DEFINICIÓN DEL TRABAJO (JOB)
+# -----------------------------------------------------------
+jobs:
+  deploy: # Define un único trabajo llamado 'deploy'.
+    runs-on: ubuntu-latest # Especifica que este trabajo se ejecutará en un servidor virtual con la última versión de Ubuntu.
+
+    steps: # La secuencia de comandos o acciones a ejecutar en el servidor de Ubuntu.
+    
+      # -------------------------------------------------------
+      # PASO 1: OBTENER EL CÓDIGO FUENTE
+      # -------------------------------------------------------
+      - name: Checkout Repo # Nombre descriptivo del paso.
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------------------------------------------------------
+      # PASO 2: CONFIGURAR PYTHON
+      # -------------------------------------------------------
+      - name: Set up Python # Nombre descriptivo del paso.
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' # Especifica que se debe usar la última versión de Python 3.
+
+      # -------------------------------------------------------
+      # PASO 3: INSTALAR DEPENDENCIAS
+      # -------------------------------------------------------
+      - name: Install dependencies # Nombre descriptivo del paso.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # -------------------------------------------------------
+      # PASO 4: CONFIGURAR IDENTIDAD GIT (NECESARIA PARA gh-deploy)
+      # -------------------------------------------------------
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # -------------------------------------------------------
+      # PASO 5: CONSTRUIR Y DESPLEGAR LA DOCUMENTACIÓN
+      # -------------------------------------------------------
+      - name: Deploy docs # Nombre descriptivo del paso.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdocs gh-deploy --force
