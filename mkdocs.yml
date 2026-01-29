@@ -1,0 +1,12 @@
+site_name: Documentación Tarea RA 2 RRF - Análisis de Vulnerabilidades
+
+nav:
+  - Home: index.md
+  - Reflexión: reflexion.md
+  - Análisis de Vulnerabilidad: entorno-vulnerables-RRF/analisisVulnerabilidad.md
+  - Trazado de Vulnerabilidad: Trazado/TrazadoVulnerabilidadGoAnywhere.md
+  - Verificación ASVS: verificacion-ASVS-RRF/ComprobacionRequisitosAplicacion_RRF.md
+
+doc_dir: docs
+
+
